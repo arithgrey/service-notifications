@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  notifications-test:
+    build: .
+    container_name: service-notifications-test
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - APP_ENV=test
+      - SLACK_WEBHOOK_URL=http://placeholder-replaced-in-test:9999/webhook
+    command: tail -f /dev/null

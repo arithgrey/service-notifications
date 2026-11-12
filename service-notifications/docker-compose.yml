@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  service-notifications:
+    build: .
+    image: ${SERVICENAME:-service-notifications}_service
+    container_name: ${SERVICENAME:-service-notifications}_service
+    ports:
+      - "8090:8080"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    networks:
+      - backend
+      - enid_service_network
+
+networks:
+  backend:
+    driver: bridge
+  enid_service_network:
+    external: true

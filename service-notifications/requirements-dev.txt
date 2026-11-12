@@ -1,0 +1,4 @@
+watchdog[watchmedo]==4.0.0
+pytest==7.4.4
+pytest-httpserver==1.0.10
+httpx==0.26.0
