@@ -671,7 +671,7 @@ Esperado: imprime `OK` sin errores.
 
 **Nota sobre order/views.py:** la llamada a `notify_order` ocurre dentro del bloque `transaction.atomic()`, después de que `register_items_order` ya guardó los items. `order.items.all()` los verá correctamente. Si `notify_order` lanza (aunque no debería), el `try/except` interior lo absorbe sin afectar la transacción.
 
-- [ ] **Step 1: Modificar order/views.py — agregar import**
+- [x] **Step 1: Modificar order/views.py — agregar import**
 
 Agregar al bloque de imports en `enid-store/enid/order/views.py`:
 
@@ -679,7 +679,7 @@ Agregar al bloque de imports en `enid-store/enid/order/views.py`:
 from notifications.client import notify_order
 ```
 
-- [ ] **Step 2: Modificar order/views.py — llamar notify_order tras Stripe exitoso**
+- [x] **Step 2: Modificar order/views.py — llamar notify_order tras Stripe exitoso**
 
 Ubicar el bloque `if charge_result['status'] == 'success':` (aprox línea 53) y agregar la llamada antes del `return`:
 
@@ -690,7 +690,7 @@ if charge_result['status'] == 'success':
     return Response(order_data, status=status.HTTP_201_CREATED)
 ```
 
-- [ ] **Step 3: Modificar order_payment_on_delivery/views.py — agregar import**
+- [x] **Step 3: Modificar order_payment_on_delivery/views.py — agregar import**
 
 Agregar al bloque de imports en `enid-store/enid/order_payment_on_delivery/views.py`:
 
@@ -698,7 +698,7 @@ Agregar al bloque de imports en `enid-store/enid/order_payment_on_delivery/views
 from notifications.client import notify_order
 ```
 
-- [ ] **Step 4: Modificar order_payment_on_delivery/views.py — llamar notify_order tras crear orden POD**
+- [x] **Step 4: Modificar order_payment_on_delivery/views.py — llamar notify_order tras crear orden POD**
 
 Ubicar el bloque `if isinstance(order, Order):` dentro del `transaction.atomic()` y agregar la llamada después de `register_items_order`:
 
@@ -710,7 +710,7 @@ if isinstance(order, Order):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 ```
 
-- [ ] **Step 5: Modificar order_management/views.py — agregar import y perform_update**
+- [x] **Step 5: Modificar order_management/views.py — agregar import y perform_update**
 
 Reemplazar el contenido completo de `enid-store/enid/order_management/views.py`:
 
@@ -734,7 +734,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             notify_order(instance.status, instance)
 ```
 
-- [ ] **Step 6: Verificar que enid-store arranca sin errores**
+- [x] **Step 6: Verificar que enid-store arranca sin errores**
 
 ```bash
 docker compose up --build
@@ -742,11 +742,11 @@ docker compose up --build
 
 Esperado: servicio levanta, no hay ImportError ni SyntaxError en los logs.
 
-- [ ] **Step 7: Smoke test manual — crear orden de prueba**
+- [x] **Step 7: Smoke test manual — crear orden de prueba**
 
 Con enid-store y service-notifications corriendo, hacer login en `http://localhost/login` con `enidservice@gmail.com` / `enidservice@gmail.com` y crear una orden de prueba desde la tienda. Verificar que llega notificación en Slack.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add enid-store/enid/order/views.py \
@@ -769,4 +769,4 @@ git commit -m "#[WI]: Step 5 - wire up notify_order en los 3 puntos de enid-stor
 
 ---
 
-**Progreso:** 4/5 Tasks (80%) — ⏸️ SIGUIENTE: Task 5 - Wire up notify_order en los 3 puntos de enid-store
+**Progreso:** 5/5 Tasks (100%) ✅ — Plan completo

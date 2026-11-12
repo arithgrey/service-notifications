@@ -6,9 +6,10 @@ services:
     image: ${SERVICENAME:-service-notifications}_service
     container_name: ${SERVICENAME:-service-notifications}_service
     ports:
-      - "8090:8080"
-    env_file:
-      - .env
+      - "8091:8080"
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - APP_ENV=development
     volumes:
       - .:/app
     networks:
