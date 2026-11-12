@@ -77,13 +77,13 @@
 **Interfaces:**
 - Produce: directorio `service-notifications/` listo para `docker compose up --build`
 
-- [ ] **Step 1: Crear directorio raíz**
+- [x] **Step 1: Crear directorio raíz**
 
 ```bash
 mkdir -p service-notifications/app/schemas service-notifications/app/services service-notifications/app/routers service-notifications/tests
 ```
 
-- [ ] **Step 2: Crear Dockerfile**
+- [x] **Step 2: Crear Dockerfile**
 
 ```dockerfile
 # service-notifications/Dockerfile
@@ -110,7 +110,7 @@ CMD ["watchmedo", "auto-restart", \
      "uvicorn", "app.main:app", "--host=0.0.0.0", "--port=8080"]
 ```
 
-- [ ] **Step 3: Crear docker-compose.yml (dev con hot-reload)**
+- [x] **Step 3: Crear docker-compose.yml (dev con hot-reload)**
 
 ```yaml
 # service-notifications/docker-compose.yml
@@ -138,7 +138,7 @@ networks:
     external: true
 ```
 
-- [ ] **Step 4: Crear docker-compose.test.yml**
+- [x] **Step 4: Crear docker-compose.test.yml**
 
 ```yaml
 # service-notifications/docker-compose.test.yml
@@ -157,7 +157,7 @@ services:
     command: tail -f /dev/null
 ```
 
-- [ ] **Step 5: Crear requirements.txt**
+- [x] **Step 5: Crear requirements.txt**
 
 ```
 fastapi==0.111.0
@@ -166,7 +166,7 @@ python-decouple==3.8
 requests==2.31.0
 ```
 
-- [ ] **Step 6: Crear requirements-dev.txt**
+- [x] **Step 6: Crear requirements-dev.txt**
 
 ```
 watchdog[watchmedo]==4.0.0
@@ -175,14 +175,14 @@ pytest-httpserver==1.0.10
 httpx==0.26.0
 ```
 
-- [ ] **Step 7: Crear env.example**
+- [x] **Step 7: Crear env.example**
 
 ```
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXXX/YYYY/ZZZZ
 APP_ENV=development
 ```
 
-- [ ] **Step 8: Crear archivos __init__.py vacíos**
+- [x] **Step 8: Crear archivos __init__.py vacíos**
 
 ```bash
 touch service-notifications/app/__init__.py
@@ -192,7 +192,7 @@ touch service-notifications/app/routers/__init__.py
 touch service-notifications/tests/__init__.py
 ```
 
-- [ ] **Step 9: Build para verificar que el scaffold es válido**
+- [x] **Step 9: Build para verificar que el scaffold es válido**
 
 ```bash
 cd service-notifications
@@ -201,7 +201,7 @@ docker compose build
 
 Esperado: build exitoso sin errores.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add service-notifications/
@@ -222,7 +222,7 @@ git commit -m "#[WI]: Step 1 - scaffold service-notifications"
 - Produce: `OrderEvent` (Enum), `OrderEventPayload` (Pydantic) desde `app.schemas.order_event`
 - Produce: `app` (FastAPI instance) desde `app.main`
 
-- [ ] **Step 1: Crear app/config.py**
+- [x] **Step 1: Crear app/config.py**
 
 ```python
 # service-notifications/app/config.py
@@ -231,7 +231,7 @@ from decouple import config
 SLACK_WEBHOOK_URL: str = config("SLACK_WEBHOOK_URL")
 ```
 
-- [ ] **Step 2: Crear app/schemas/order_event.py**
+- [x] **Step 2: Crear app/schemas/order_event.py**
 
 ```python
 # service-notifications/app/schemas/order_event.py
@@ -253,7 +253,7 @@ class OrderEventPayload(BaseModel):
     source: str = ""
 ```
 
-- [ ] **Step 3: Crear app/main.py (skeleton sin router aún)**
+- [x] **Step 3: Crear app/main.py (skeleton sin router aún)**
 
 ```python
 # service-notifications/app/main.py
@@ -262,7 +262,7 @@ from fastapi import FastAPI
 app = FastAPI(title="service-notifications")
 ```
 
-- [ ] **Step 4: Levantar servicio para verificar que arranca**
+- [x] **Step 4: Levantar servicio para verificar que arranca**
 
 ```bash
 docker compose up --build
@@ -272,7 +272,7 @@ curl http://localhost:8090/docs
 
 Esperado: responde con HTML de Swagger UI (FastAPI activo).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add service-notifications/app/config.py \
@@ -301,14 +301,14 @@ git commit -m "#[WI]: Step 2 - config, schema y app skeleton"
 
 **Nota sobre tests:** `pytest-httpserver` inicia un servidor HTTP real en un puerto aleatorio durante el test. `SlackNotifier` recibe el `webhook_url` como argumento de constructor, lo que permite apuntarlo al servidor real de test sin usar mocks ni monkeypatch. `app.dependency_overrides` es el mecanismo oficial de FastAPI para inyectar dependencias en tests — no es mocking.
 
-- [ ] **Step 1: Levantar contenedor de test**
+- [x] **Step 1: Levantar contenedor de test**
 
 ```bash
 cd service-notifications
 docker compose -f docker-compose.test.yml up -d
 ```
 
-- [ ] **Step 2: Escribir tests (deben fallar — RED)**
+- [x] **Step 2: Escribir tests (deben fallar — RED)**
 
 Crear `service-notifications/tests/test_notify_order.py`:
 
@@ -436,7 +436,7 @@ class TestNotifyOrderEndpoint:
         assert response.status_code == 502
 ```
 
-- [ ] **Step 3: Correr tests para confirmar que fallan (RED)**
+- [x] **Step 3: Correr tests para confirmar que fallan (RED)**
 
 ```bash
 docker exec service-notifications-test pytest tests/test_notify_order.py -v
@@ -444,7 +444,7 @@ docker exec service-notifications-test pytest tests/test_notify_order.py -v
 
 Esperado: `ModuleNotFoundError: No module named 'app.services.slack'`
 
-- [ ] **Step 4: Crear app/services/slack.py**
+- [x] **Step 4: Crear app/services/slack.py**
 
 ```python
 # service-notifications/app/services/slack.py
@@ -490,7 +490,7 @@ class SlackNotifier:
         return "\n".join(lines)
 ```
 
-- [ ] **Step 5: Crear app/dependencies.py**
+- [x] **Step 5: Crear app/dependencies.py**
 
 ```python
 # service-notifications/app/dependencies.py
@@ -501,7 +501,7 @@ def get_notifier() -> SlackNotifier:
     return SlackNotifier()
 ```
 
-- [ ] **Step 6: Crear app/routers/notify.py**
+- [x] **Step 6: Crear app/routers/notify.py**
 
 ```python
 # service-notifications/app/routers/notify.py
@@ -524,7 +524,7 @@ def notify_order(
     return {"ok": True}
 ```
 
-- [ ] **Step 7: Registrar router en app/main.py**
+- [x] **Step 7: Registrar router en app/main.py**
 
 Reemplazar el contenido de `app/main.py`:
 
@@ -537,7 +537,7 @@ app = FastAPI(title="service-notifications")
 app.include_router(router)
 ```
 
-- [ ] **Step 8: Correr tests (GREEN)**
+- [x] **Step 8: Correr tests (GREEN)**
 
 ```bash
 docker exec service-notifications-test pytest tests/test_notify_order.py -v
@@ -545,7 +545,7 @@ docker exec service-notifications-test pytest tests/test_notify_order.py -v
 
 Esperado: todos los tests en PASS.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add service-notifications/app/services/slack.py \
@@ -556,7 +556,7 @@ git add service-notifications/app/services/slack.py \
 git commit -m "#[WI]: Step 3 - SlackNotifier + endpoint /notify/order (TDD)"
 ```
 
-- [ ] **Step 10: Bajar contenedor de test**
+- [x] **Step 10: Bajar contenedor de test**
 
 ```bash
 docker compose -f docker-compose.test.yml down
@@ -776,4 +776,4 @@ git commit -m "#[WI]: Step 5 - wire up notify_order en los 3 puntos de enid-stor
 
 ---
 
-**Progreso:** 0/5 Tasks (0%)
+**Progreso:** 3/5 Tasks (60%) — ⏸️ SIGUIENTE: Task 4 - enid-store notifications client
