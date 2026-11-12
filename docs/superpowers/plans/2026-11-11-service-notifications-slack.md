@@ -580,13 +580,13 @@ docker compose -f docker-compose.test.yml down
 
 **Nota:** `notifications/` no es una Django app (sin modelos ni migrations). Es un módulo Python simple. No agregar a `INSTALLED_APPS`.
 
-- [ ] **Step 1: Crear archivos del módulo notifications**
+- [x] **Step 1: Crear archivos del módulo notifications**
 
 ```bash
 touch enid-store/enid/notifications/__init__.py
 ```
 
-- [ ] **Step 2: Crear enid-store/enid/notifications/client.py**
+- [x] **Step 2: Crear enid-store/enid/notifications/client.py**
 
 ```python
 # enid-store/enid/notifications/client.py
@@ -631,7 +631,7 @@ def notify_order(event: str, order) -> None:
         logger.error("notify_order failed for order %s: %s", order.id, e)
 ```
 
-- [ ] **Step 3: Agregar NOTIFICATIONS_SERVICE_URL a settings.py**
+- [x] **Step 3: Agregar NOTIFICATIONS_SERVICE_URL a settings.py**
 
 En `enid-store/enid/enid/settings.py`, agregar junto a las otras vars de config (cerca de `STRIPE_SECRET_KEY`):
 
@@ -639,7 +639,7 @@ En `enid-store/enid/enid/settings.py`, agregar junto a las otras vars de config 
 NOTIFICATIONS_SERVICE_URL = config("NOTIFICATIONS_SERVICE_URL", default="")
 ```
 
-- [ ] **Step 4: Agregar var a env.example**
+- [x] **Step 4: Agregar var a env.example**
 
 En `enid-store/enid/env.example`, agregar:
 
@@ -647,7 +647,7 @@ En `enid-store/enid/env.example`, agregar:
 NOTIFICATIONS_SERVICE_URL=http://localhost:8090
 ```
 
-- [ ] **Step 5: Verificar que el módulo importa correctamente**
+- [x] **Step 5: Verificar que el módulo importa correctamente**
 
 ```bash
 docker exec ${SERVICENAME}_service python -c "from notifications.client import notify_order; print('OK')"
@@ -655,14 +655,7 @@ docker exec ${SERVICENAME}_service python -c "from notifications.client import n
 
 Esperado: imprime `OK` sin errores.
 
-- [ ] **Step 6: Commit**
-
-```bash
-git add enid-store/enid/notifications/ \
-        enid-store/enid/enid/settings.py \
-        enid-store/enid/env.example
-git commit -m "#[WI]: Step 4 - notifications client en enid-store"
-```
+- [x] **Step 6: Commit**
 
 ---
 
@@ -776,4 +769,4 @@ git commit -m "#[WI]: Step 5 - wire up notify_order en los 3 puntos de enid-stor
 
 ---
 
-**Progreso:** 3/5 Tasks (60%) — ⏸️ SIGUIENTE: Task 4 - enid-store notifications client
+**Progreso:** 4/5 Tasks (80%) — ⏸️ SIGUIENTE: Task 5 - Wire up notify_order en los 3 puntos de enid-store
