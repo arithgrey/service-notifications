@@ -841,7 +841,7 @@ Repo frontend: `/home/arithgrey/enid/service-store` (repo git anidado; commitear
 **Interfaces:**
 - Consumes (backend Task 5 y 6): `PATCH enid/productos/{id}/certification/` body `{certification}`; `POST enid/productos/manual-sale/` body `{items, status, sale_date}`. El `ProductSerializer` ya expone `certification` y `certified_at` (`fields='__all__'`).
 
-- [ ] **Step 1: Escribir el test que falla (Jest)**
+- [x] **Step 1: Escribir el test que falla (Jest)** ✅ (2026-11-13)
 
 Create `service-store/tests/ProductCertificationConfig.spec.js`:
 
@@ -875,12 +875,12 @@ describe('ProductCertificationConfig', () => {
 });
 ```
 
-- [ ] **Step 2: Correr el test y verificar que falla**
+- [x] **Step 2: Correr el test y verificar que falla** ✅ (2026-11-13) — módulo no existe
 
 Run: `docker exec service-store-frontend-1 npx jest tests/ProductCertificationConfig.spec.js`
 Expected: FAIL — no existe el componente.
 
-- [ ] **Step 3: Crear `ProductCertificationConfig.vue`**
+- [x] **Step 3: Crear `ProductCertificationConfig.vue`** ✅ (2026-11-13)
 
 Create `service-store/src/components/Products/ProductCertificationConfig.vue`:
 
@@ -929,7 +929,7 @@ export default {
 </script>
 ```
 
-- [ ] **Step 4: Crear `ManualSaleForm.vue`**
+- [x] **Step 4: Crear `ManualSaleForm.vue`** ✅ (2026-11-13)
 
 Create `service-store/src/components/Products/ManualSaleForm.vue`:
 
@@ -979,7 +979,7 @@ export default {
 </script>
 ```
 
-- [ ] **Step 5: Montar ambos componentes en la vista de producto admin**
+- [x] **Step 5: Montar ambos componentes en la vista de producto admin** ✅ (2026-11-13)
 
 En `service-store/src/views/Product/ProductDetail.vue`, importar y montar (con `@/`):
 
@@ -1002,12 +1002,9 @@ onProductUpdated(updated) { this.product = { ...this.product, ...updated }; },
 onSaleRegistered() { if (this.fetchProduct) this.fetchProduct(); },
 ```
 
-- [ ] **Step 6: Correr el test y verificar que pasa**
+- [x] **Step 6: Correr el test y verificar que pasa** ✅ (2026-11-13) — 3/3 PASS
 
-Run: `docker exec service-store-frontend-1 npx jest tests/ProductCertificationConfig.spec.js`
-Expected: PASS (los 3 tests).
-
-- [ ] **Step 7: Commit (en el repo anidado service-store, rama develop)**
+- [x] **Step 7: Commit (en el repo anidado service-store, rama develop)** ✅ (2026-11-13)
 
 ```bash
 cd /home/arithgrey/enid/service-store
@@ -1020,7 +1017,12 @@ git commit -m "#0: UI admin certificación (badge + certificar + venta manual)"
 
 ---
 
-**Progreso:** 6/7 Tasks (86%) — ⏸️ SIGUIENTE: Task 7 (frontend admin service-store)
+**Progreso:** 7/7 Tasks (100%) ✅ COMPLETO
+
+> NOTA Task 7 (2026-11-13) — desviaciones del plan:
+> 1. Spec ubicado en `tests/unit/components/Products/ProductCertificationConfig.spec.js` (patrón real del repo), no en `tests/`.
+> 2. Componentes montados en `src/components/Products/ProductConfig.vue` (agregador admin real, junto a ProductDeliverySchedulingConfig/InventoryConfig), NO en `views/Product/ProductDetail.vue` (esa es la vista PÚBLICA; montar controles admin ahí sería incorrecto).
+> 3. BLOQUEO infra resuelto: se borró `src/.babelrc.js` — stub ESM muerto (`export default` + `"type":"module"`) que rompía Jest para TODOS los specs de componentes (babel-jest síncrono no carga config ESM). Vite no usa babel; babel.config.json raíz ya cubre. Aprobado por el usuario. Mis 3 tests pasan. `FormCheckout.spec.js` sigue fallando por otra causa pre-existente ajena (`import.meta`).
 
 > NOTA Task 6 (2026-11-13): helper reusa fila sembrada (colisión secuencia Postgres). Regresión `products.tests order item_order revenue`: 23 fails/errors TODOS pre-existentes (14 de products.tests + 9 de order/item_order/revenue, confirmado por baselines separados). Los 15 tests de la feature certificación pasan.
 
