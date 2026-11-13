@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Repos de servicios anidados (cada uno es su propio repo git, rama develop)
+/enid-store/
+/service-store/
+/service_leads/
+/service_stock/
+/service-faqs/
+/service-landings/
+/service-oauth/
+/service-references/
+/reverse_proxy_nginx/
+/enid-store-frontend/
