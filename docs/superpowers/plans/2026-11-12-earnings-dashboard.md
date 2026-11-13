@@ -709,7 +709,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 **Interfaces:**
 - Produces: ruta `/ingresos` protegida → renderiza `EarningsDashboard.vue` con sub-rutas
 
-- [ ] **Step 1: Instalar chart.js y vue-chartjs**
+- [x] **Step 1: Instalar chart.js y vue-chartjs** ✅ (2026-11-13)
 
 ```bash
 docker exec service-store_service npm install chart.js@^4 vue-chartjs@^5
@@ -717,14 +717,14 @@ docker exec service-store_service npm install chart.js@^4 vue-chartjs@^5
 
 Si el contenedor se llama diferente, verifica con `docker ps | grep store`.
 
-- [ ] **Step 2: Crear directorios**
+- [x] **Step 2: Crear directorios** ✅ (2026-11-13)
 
 ```bash
 mkdir -p service-store/src/views/Earnings
 mkdir -p service-store/src/components/Earnings
 ```
 
-- [ ] **Step 3: Crear EarningsDashboard.vue**
+- [x] **Step 3: Crear EarningsDashboard.vue** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/views/Earnings/EarningsDashboard.vue -->
@@ -759,7 +759,7 @@ const tabs = [
 </script>
 ```
 
-- [ ] **Step 4: Crear stubs de las 3 sub-vistas**
+- [x] **Step 4: Crear stubs de las 3 sub-vistas** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/views/Earnings/Rendimiento.vue -->
@@ -794,7 +794,7 @@ const tabs = [
 <script setup></script>
 ```
 
-- [ ] **Step 5: Añadir rutas en router/index.js**
+- [x] **Step 5: Añadir rutas en router/index.js** ✅ (2026-11-13)
 
 Busca el archivo en `service-store/src/router/index.js`. Añade dentro del array de rutas (respeta el guard de auth existente — copia el patrón `meta: { requiresAuth: true }` de otras rutas admin):
 
@@ -823,7 +823,7 @@ Busca el archivo en `service-store/src/router/index.js`. Añade dentro del array
 
 > **Nota:** El guard de auth en este proyecto puede usar `meta.requiresAuth` o puede ser un guard de Vuex/store. Revisa cómo están protegidas otras rutas admin (ej. la ruta de OrderDetail) y replica exactamente ese patrón.
 
-- [ ] **Step 6: Verificar navegación en browser**
+- [x] **Step 6: Verificar navegación en browser** ✅ (2026-11-13) — sin errores de compilación, guard redirige correctamente
 
 ```bash
 # El frontend ya debe estar corriendo con docker compose up
@@ -831,7 +831,7 @@ Busca el archivo en `service-store/src/router/index.js`. Añade dentro del array
 # Verificar que se ve el sidebar con los 3 tabs y el contenido stub
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit** ✅ (2026-11-13)
 
 ```bash
 git add service-store/src/views/Earnings/ service-store/src/router/ service-store/package.json service-store/package-lock.json
@@ -1478,4 +1478,4 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 ---
 
-**Progreso:** 2/6 Tasks (33%) — ⏸️ SIGUIENTE: Task 3 Step 1 (instalar chart.js en service-store)
+**Progreso:** 3/6 Tasks (50%) — ⏸️ SIGUIENTE: Task 4 Step 1 (crear BarChart.vue en service-store/src/components/Earnings/)
