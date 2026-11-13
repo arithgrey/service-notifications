@@ -1301,7 +1301,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - Consumes: `GET /enid/order-search/?status=<status>` — endpoint existente, reutiliza `OrderSearchSerializer`
 - Produces: tablas de órdenes con columnas ID · Fecha · Cliente · Total · Status · Acciones
 
-- [ ] **Step 1: Verificar el endpoint existente de order-search**
+- [x] **Step 1: Verificar el endpoint existente de order-search** ✅ (2026-11-13)
 
 ```bash
 # En browser o curl, verificar que el endpoint responde:
@@ -1310,7 +1310,7 @@ curl -s "http://localhost:8000/order-search/?status=pending" | head -c 500
 
 Verificar los campos disponibles en la respuesta. Los campos que necesitamos son: `id`, `created_at`, `user` (nombre), `items` (para calcular total), `status`.
 
-- [ ] **Step 2: Implementar CobrosPendientes.vue**
+- [x] **Step 2: Implementar CobrosPendientes.vue** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/views/Earnings/CobrosPendientes.vue -->
@@ -1398,7 +1398,7 @@ onMounted(fetchOrders)
 </script>
 ```
 
-- [ ] **Step 3: Implementar CobrosRecibidos.vue**
+- [x] **Step 3: Implementar CobrosRecibidos.vue** ✅ (2026-11-13)
 
 Igual que `CobrosPendientes.vue` pero con estos cambios:
 - `const RECEIVED_STATUSES = ['payment_confirmed', 'delivered', 'cash_on_delivery']`
@@ -1455,7 +1455,7 @@ onMounted(fetchOrders)
 
 > **Nota sobre la ruta del detalle de orden:** Verifica la ruta exacta del router para ver el detalle de una orden en este proyecto. Puede ser `/orden/:id`, `/orders/:id`, u otra. Ajusta el `:to` del `router-link` al path correcto.
 
-- [ ] **Step 4: Verificar en browser**
+- [x] **Step 4: Verificar en browser** ✅ (2026-11-13) — CobrosPendientes muestra 15 órdenes con ID/fecha/total reales; CobrosRecibidos muestra "No hay cobros recibidos" (correcto, sin órdenes payment_confirmed en DB); fix aplicado: usar proxy.$axios en vez de axios directo para respetar baseURL=localhost:8000
 
 ```
 http://localhost/ingresos/pendientes
@@ -1467,7 +1467,7 @@ Verificar:
 - Datos reales aparecen si existen órdenes
 - Link "Ver →" navega al detalle correcto
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit** ✅ (2026-11-13)
 
 ```bash
 git add service-store/src/views/Earnings/CobrosPendientes.vue service-store/src/views/Earnings/CobrosRecibidos.vue
@@ -1478,4 +1478,4 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 ---
 
-**Progreso:** 5/6 Tasks (83%) — ⏸️ SIGUIENTE: Task 6 Step 1 (verificar endpoint order-search)
+**Progreso:** 6/6 Tasks (100%) ✅ COMPLETO
