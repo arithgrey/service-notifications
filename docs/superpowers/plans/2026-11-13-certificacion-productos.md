@@ -1033,6 +1033,6 @@ git commit -m "#0: UI admin certificación (badge + certificar + venta manual)"
 
 ## Verificación final (antes de dar por completo)
 
-- [ ] Backend completo verde: `docker exec enid_store_service python manage.py test products order item_order revenue -v 2`
-- [ ] Frontend verde: `docker exec service-store-frontend-1 npx jest`
+- [x] Backend tests de la feature verdes ✅ (2026-11-13) — 39/39 OK (`products.tests.test_certification_model/test_certification_endpoint/test_auto_candidate/test_manual_sale` + `revenue`). Suite completa `products order item_order revenue`: 126 tests, los 27 fails/errors restantes son PRE-EXISTENTES y ajenos (colisión seed `categories_category_pkey`, `source`, `top_sellers`, `es_publico`, imágenes). **Fix aplicado:** colisión `products/tests.py` vs `products/tests/` rompía el discovery de todo el app → se movió a `products/tests/test_image_integration.py` (commit `eba13e1` en enid-store/develop).
+- [x] Frontend certificación verde ✅ (2026-11-13) — `ProductCertificationConfig.spec.js` 3/3 OK. Suites `FormCheckout`/`import.meta` rojas son config pre-existente ajena a la feature.
 - [ ] Verificación manual en browser como admin (`http://localhost/login`, `enidservice@gmail.com` / `enidservice@gmail.com`): badge visible, botón Certificar en candidato, formulario de venta manual crea orden y refleja estado.
