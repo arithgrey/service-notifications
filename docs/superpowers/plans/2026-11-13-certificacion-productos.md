@@ -680,7 +680,7 @@ Crea `Order` (`source='admin_manual'`, status de ingreso) + `ItemOrder`s. Dispar
 - Consumes: `Order.sale_date` (Task 3), signal de promoción (Task 4), `revenue.constants.RECIBIDOS` (Task 1).
 - Produces: ruta `POST /productos/manual-sale/` body `{"items": [{"product": id, "quantity": n, "price": d}], "status": "delivered", "sale_date": "ISO|null"}`, `IsAdminUser`. Devuelve `201` `{"order_id", "status"}`; `400` sin items / producto inexistente / status inválido; `403` no-admin.
 
-- [ ] **Step 1: Escribir el test que falla**
+- [x] **Step 1: Escribir el test que falla** ✅ (2026-11-13)
 
 Create `enid/products/tests/test_manual_sale.py`:
 
@@ -758,12 +758,12 @@ class ManualSaleTest(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 ```
 
-- [ ] **Step 2: Correr el test y verificar que falla**
+- [x] **Step 2: Correr el test y verificar que falla** ✅ (2026-11-13) — 5 fallan, ruta no existía
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_manual_sale -v 2`
 Expected: FAIL — `404` (ruta `manual-sale` no existe).
 
-- [ ] **Step 3: Añadir la `@action` `manual_sale`**
+- [x] **Step 3: Añadir la `@action` `manual_sale`** ✅ (2026-11-13)
 
 En `enid/products/views.py` añadir imports:
 
@@ -809,17 +809,17 @@ Dentro de `ProductVuewSet`:
         return Response({'order_id': order.id, 'status': order.status}, status=201)
 ```
 
-- [ ] **Step 4: Correr el test y verificar que pasa**
+- [x] **Step 4: Correr el test y verificar que pasa** ✅ (2026-11-13) — 5/5 OK
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_manual_sale -v 2`
 Expected: PASS (los 5 tests).
 
-- [ ] **Step 5: Correr la suite de backend completa (regresión)**
+- [x] **Step 5: Correr la suite de backend completa (regresión)** ✅ (2026-11-13) — sin fallos nuevos; los 23 fails/errors son pre-existentes (union de baselines products/order/revenue)
 
 Run: `docker exec enid_store_service python manage.py test products order item_order revenue -v 2`
 Expected: PASS, cero fallos.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit** ✅ (2026-11-13)
 
 ```bash
 git add enid/products/views.py enid/products/tests/test_manual_sale.py
@@ -1020,7 +1020,9 @@ git commit -m "#0: UI admin certificación (badge + certificar + venta manual)"
 
 ---
 
-**Progreso:** 5/7 Tasks (71%) — ⏸️ SIGUIENTE: Task 6 (endpoint POST manual-sale)
+**Progreso:** 6/7 Tasks (86%) — ⏸️ SIGUIENTE: Task 7 (frontend admin service-store)
+
+> NOTA Task 6 (2026-11-13): helper reusa fila sembrada (colisión secuencia Postgres). Regresión `products.tests order item_order revenue`: 23 fails/errors TODOS pre-existentes (14 de products.tests + 9 de order/item_order/revenue, confirmado por baselines separados). Los 15 tests de la feature certificación pasan.
 
 > NOTA Task 5 (2026-11-13): helper `_make_product` reusa fila sembrada (`Product.objects.first()`) en vez de crear filas nuevas, para evitar colisión de secuencia de Postgres — mismo patrón que Task 4. 5/5 tests verdes. La suite completa `products.tests` tiene 10 fails + 4 errors PRE-EXISTENTES (es_publico/top_sellers/serializers/create_multiple) ajenos a esta task, confirmados en develop limpio.
 > NOTA Task 4: services.py y signals.py YA existían (seeder post_migrate); se AÑADIÓ (append), no se sobreescribió. apps.ready ya importaba products.signals.
