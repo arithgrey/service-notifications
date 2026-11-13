@@ -134,7 +134,7 @@ git commit -m "#0: extraer RECIBIDOS/PENDIENTES a revenue/constants.py (DRY)"
 **Interfaces:**
 - Produces: `Product.CERTIFICATION_CHOICES` (tuple), `Product.certification` (CharField, default `'published'`), `Product.certified_at` (DateTimeField, nullable).
 
-- [ ] **Step 1: Escribir el test que falla**
+- [x] **Step 1: Escribir el test que falla**
 
 Create `enid/products/tests/test_certification_model.py`:
 
@@ -162,12 +162,12 @@ class ProductCertificationModelTest(TestCase):
         self.assertEqual(keys, ['published', 'candidate', 'certified'])
 ```
 
-- [ ] **Step 2: Correr el test y verificar que falla**
+- [x] **Step 2: Correr el test y verificar que falla**
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_certification_model -v 2`
 Expected: FAIL — `AttributeError`/`type object 'Product' has no attribute 'CERTIFICATION_CHOICES'`.
 
-- [ ] **Step 3: Añadir los campos al modelo `Product`**
+- [x] **Step 3: Añadir los campos al modelo `Product`**
 
 En `enid/products/models.py`, dentro de la clase `Product` (junto a los demás campos, antes de los métodos `def __str__`):
 
@@ -187,17 +187,17 @@ En `enid/products/models.py`, dentro de la clase `Product` (junto a los demás c
     )
 ```
 
-- [ ] **Step 4: Crear la migración**
+- [x] **Step 4: Crear la migración**
 
 Run: `docker exec enid_store_service python manage.py makemigrations products`
 Expected: genera `products/migrations/0005_product_certification.py` con `AddField` de `certification` y `certified_at`, `dependencies = [('products', '0004_delivery_scheduling_fields')]`.
 
-- [ ] **Step 5: Correr tests (aplican migración sobre DB de test)**
+- [x] **Step 5: Correr tests (aplican migración sobre DB de test)**
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_certification_model -v 2`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add enid/products/models.py enid/products/migrations/0005_product_certification.py \
@@ -1020,7 +1020,9 @@ git commit -m "#0: UI admin certificación (badge + certificar + venta manual)"
 
 ---
 
-**Progreso:** 1/7 Tasks (14%) — ⏸️ SIGUIENTE: Task 2 (campos certification en Product)
+**Progreso:** 2/7 Tasks (29%) — ⏸️ SIGUIENTE: Task 3 (Order.sale_date + fecha efectiva revenue)
+
+> NOTA (2026-11-13): `**/migrations/` está en `.gitignore` del repo enid-store y NINGUNA migración se trackea. Las migraciones se regeneran con `makemigrations`; no se commitean (desviación necesaria del texto literal del plan). Helpers de test reusan filas sembradas por el post_migrate del entorno para evitar colisiones de secuencia de Postgres.
 
 ## Verificación final (antes de dar por completo)
 
