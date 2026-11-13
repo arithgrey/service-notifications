@@ -1090,7 +1090,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - Consumes: `GET /enid/revenue/comparison/?year=YYYY` (Task 2)
 - Consumes: `GET /enid/revenue/by-product/?year=YYYY&month=MM` (Task 2)
 
-- [ ] **Step 1: Crear LineChart.vue**
+- [x] **Step 1: Crear LineChart.vue** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/components/Earnings/LineChart.vue -->
@@ -1177,7 +1177,7 @@ const chartOptions = {
 </script>
 ```
 
-- [ ] **Step 2: Crear ProductIncomeList.vue**
+- [x] **Step 2: Crear ProductIncomeList.vue** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/components/Earnings/ProductIncomeList.vue -->
@@ -1225,7 +1225,7 @@ defineProps({
 </script>
 ```
 
-- [ ] **Step 3: Integrar LineChart y ProductIncomeList en Rendimiento.vue**
+- [x] **Step 3: Integrar LineChart y ProductIncomeList en Rendimiento.vue** ✅ (2026-11-13)
 
 Añade en el `<template>` de `Rendimiento.vue` (después de `MonthSummaryCard`):
 
@@ -1269,7 +1269,7 @@ watch(selectedMonth, () => { fetchSummary(); fetchByProduct() })
 onMounted(() => { fetchMonthly(); fetchSummary(); fetchComparison(); fetchByProduct() })
 ```
 
-- [ ] **Step 4: Verificar en browser**
+- [x] **Step 4: Verificar en browser** ✅ (2026-11-13) — UI renderiza sin errores de compilación; ProductIncomeList muestra "Sin productos este mes", LineChart oculto por v-if (token expirado en esta sesión)
 
 ```
 http://localhost/ingresos/rendimiento
@@ -1280,7 +1280,7 @@ Verificar:
 - Toggle "Mostrar ingresos futuros" oculta/muestra puntos futuros
 - Lista de productos visible (vacía si no hay datos, con placeholder)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit** ✅ (2026-11-13)
 
 ```bash
 git add service-store/src/components/Earnings/LineChart.vue service-store/src/components/Earnings/ProductIncomeList.vue service-store/src/views/Earnings/Rendimiento.vue
@@ -1478,4 +1478,4 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 ---
 
-**Progreso:** 4/6 Tasks (67%) — ⏸️ SIGUIENTE: Task 5 Step 1 (crear LineChart.vue)
+**Progreso:** 5/6 Tasks (83%) — ⏸️ SIGUIENTE: Task 6 Step 1 (verificar endpoint order-search)
