@@ -388,7 +388,7 @@ Al guardarse una `Order`/`ItemOrder` con `status in RECIBIDOS`, promover a `cand
 - Consumes: `Product.certification` (Task 2), `Order.sale_date` no requerido aquí, `revenue.constants.RECIBIDOS` (Task 1).
 - Produces: `products.services.promote_products_to_candidate(order) -> None`.
 
-- [ ] **Step 1: Escribir el test que falla**
+- [x] **Step 1: Escribir el test que falla**
 
 Create `enid/products/tests/test_auto_candidate.py`:
 
@@ -432,12 +432,12 @@ class AutoCandidateTest(TestCase):
         self.assertEqual(product.certification, 'certified')
 ```
 
-- [ ] **Step 2: Correr el test y verificar que falla**
+- [x] **Step 2: Correr el test y verificar que falla**
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_auto_candidate -v 2`
 Expected: FAIL — en `test_income_order_promotes...`, `certification` sigue `'published'` (aún no hay signal).
 
-- [ ] **Step 3: Crear el servicio de promoción**
+- [x] **Step 3: Crear el servicio de promoción**
 
 Create `enid/products/services.py`:
 
@@ -463,7 +463,7 @@ def promote_products_to_candidate(order):
     ).update(certification='candidate')
 ```
 
-- [ ] **Step 4: Crear los receivers de signals**
+- [x] **Step 4: Crear los receivers de signals**
 
 Create `enid/products/signals.py`:
 
@@ -495,7 +495,7 @@ def _promote_on_item_order_save(sender, instance, **kwargs):
         logger.error("Fallo promoviendo productos a candidate (item_order=%s)", instance.pk)
 ```
 
-- [ ] **Step 5: Registrar los signals en `apps.ready`**
+- [x] **Step 5: Registrar los signals en `apps.ready`**
 
 Leer `enid/products/apps.py`. Debe quedar así (ajustar `name` si ya difiere; conservar el existente):
 
@@ -513,12 +513,12 @@ class ProductsConfig(AppConfig):
 
 Verificar que `enid/products/__init__.py` tenga `default_app_config` o que `INSTALLED_APPS` use `'products'` (Django 4.2 autodetecta `ProductsConfig`). Si `INSTALLED_APPS` lista `'products.apps.ProductsConfig'`, dejarlo.
 
-- [ ] **Step 6: Correr el test y verificar que pasa**
+- [x] **Step 6: Correr el test y verificar que pasa**
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_auto_candidate -v 2`
 Expected: PASS (los 3 tests).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add enid/products/services.py enid/products/signals.py enid/products/apps.py \
@@ -1020,7 +1020,8 @@ git commit -m "#0: UI admin certificación (badge + certificar + venta manual)"
 
 ---
 
-**Progreso:** 3/7 Tasks (43%) — ⏸️ SIGUIENTE: Task 4 (signal published→candidate)
+**Progreso:** 4/7 Tasks (57%) — ⏸️ SIGUIENTE: Task 5 (endpoint PATCH certification)
+> NOTA Task 4: services.py y signals.py YA existían (seeder post_migrate); se AÑADIÓ (append), no se sobreescribió. apps.ready ya importaba products.signals.
 
 > NOTA (2026-11-13): `**/migrations/` está en `.gitignore` del repo enid-store y NINGUNA migración se trackea. Las migraciones se regeneran con `makemigrations`; no se commitean (desviación necesaria del texto literal del plan). Helpers de test reusan filas sembradas por el post_migrate del entorno para evitar colisiones de secuencia de Postgres.
 
