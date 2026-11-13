@@ -220,7 +220,7 @@ git commit -m "#0: campos certification y certified_at en Product + migración"
 **Interfaces:**
 - Produces: `Order.sale_date` (DateTimeField, nullable). Fecha efectiva usada por revenue = `Coalesce('order__sale_date', 'order__created_at')`.
 
-- [ ] **Step 1: Escribir el test que falla**
+- [x] **Step 1: Escribir el test que falla**
 
 Create `enid/revenue/tests/test_effective_date.py`:
 
@@ -270,12 +270,12 @@ class EffectiveDateRevenueTest(TestCase):
         self.assertEqual(float(resp.data['recibidos']), 300.0)
 ```
 
-- [ ] **Step 2: Correr el test y verificar que falla**
+- [x] **Step 2: Correr el test y verificar que falla**
 
 Run: `docker exec enid_store_service python manage.py test revenue.tests.test_effective_date -v 2`
 Expected: FAIL — `Order` no tiene campo `sale_date` (error al hacer `.update(sale_date=...)`).
 
-- [ ] **Step 3: Añadir `sale_date` al modelo `Order`**
+- [x] **Step 3: Añadir `sale_date` al modelo `Order`**
 
 En `enid/order/models.py`, dentro de la clase `Order` (junto a `source`):
 
@@ -287,12 +287,12 @@ En `enid/order/models.py`, dentro de la clase `Order` (junto a `source`):
     )
 ```
 
-- [ ] **Step 4: Crear la migración de Order**
+- [x] **Step 4: Crear la migración de Order**
 
 Run: `docker exec enid_store_service python manage.py makemigrations order`
 Expected: genera `order/migrations/0003_order_sale_date.py`, `dependencies = [('order', '0002_delivery_date_end')]`.
 
-- [ ] **Step 5: Refactorizar revenue a fecha efectiva**
+- [x] **Step 5: Refactorizar revenue a fecha efectiva**
 
 En `enid/revenue/views.py`, añadir import en la línea 5:
 
@@ -359,12 +359,12 @@ En `ByProductRevenueView.get`, reemplazar el `.filter(...)` (líneas 127-132) po
             )
 ```
 
-- [ ] **Step 6: Correr tests (nuevos + regresión revenue completa)**
+- [x] **Step 6: Correr tests (nuevos + regresión revenue completa)**
 
 Run: `docker exec enid_store_service python manage.py test revenue -v 2`
 Expected: PASS (incluye los 4 test suites existentes de revenue sin regresión).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add enid/order/models.py enid/order/migrations/0003_order_sale_date.py \
@@ -1020,7 +1020,7 @@ git commit -m "#0: UI admin certificación (badge + certificar + venta manual)"
 
 ---
 
-**Progreso:** 2/7 Tasks (29%) — ⏸️ SIGUIENTE: Task 3 (Order.sale_date + fecha efectiva revenue)
+**Progreso:** 3/7 Tasks (43%) — ⏸️ SIGUIENTE: Task 4 (signal published→candidate)
 
 > NOTA (2026-11-13): `**/migrations/` está en `.gitignore` del repo enid-store y NINGUNA migración se trackea. Las migraciones se regeneran con `makemigrations`; no se commitean (desviación necesaria del texto literal del plan). Helpers de test reusan filas sembradas por el post_migrate del entorno para evitar colisiones de secuencia de Postgres.
 
