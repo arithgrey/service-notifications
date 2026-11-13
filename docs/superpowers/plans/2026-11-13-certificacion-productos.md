@@ -538,7 +538,7 @@ git commit -m "#0: signal post_save promueve published->candidate al detectar in
 - Consumes: `Product.CERTIFICATION_CHOICES` (Task 2).
 - Produces: ruta `PATCH /productos/{pk}/certification/` body `{"certification": "<estado>"}`, `IsAdminUser`. Devuelve `ProductSerializer` del producto actualizado; `400` transición inválida; `403` no-admin.
 
-- [ ] **Step 1: Escribir el test que falla**
+- [x] **Step 1: Escribir el test que falla** ✅ (2026-11-13)
 
 Create `enid/products/tests/test_certification_endpoint.py`:
 
@@ -612,12 +612,12 @@ class CertificationEndpointTest(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 ```
 
-- [ ] **Step 2: Correr el test y verificar que falla**
+- [x] **Step 2: Correr el test y verificar que falla** ✅ (2026-11-13) — 405, ruta no existía
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_certification_endpoint -v 2`
 Expected: FAIL — `404` (la ruta `certification` no existe).
 
-- [ ] **Step 3: Añadir la `@action` `certification`**
+- [x] **Step 3: Añadir la `@action` `certification`** ✅ (2026-11-13)
 
 En `enid/products/views.py`, añadir imports arriba:
 
@@ -654,12 +654,12 @@ Dentro de `ProductVuewSet` (después de `primary_products`):
         return Response(ProductSerializer(product).data)
 ```
 
-- [ ] **Step 4: Correr el test y verificar que pasa**
+- [x] **Step 4: Correr el test y verificar que pasa** ✅ (2026-11-13) — 5/5 OK
 
 Run: `docker exec enid_store_service python manage.py test products.tests.test_certification_endpoint -v 2`
 Expected: PASS (los 5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit** ✅ (2026-11-13)
 
 ```bash
 git add enid/products/views.py enid/products/tests/test_certification_endpoint.py
@@ -1020,7 +1020,9 @@ git commit -m "#0: UI admin certificación (badge + certificar + venta manual)"
 
 ---
 
-**Progreso:** 4/7 Tasks (57%) — ⏸️ SIGUIENTE: Task 5 (endpoint PATCH certification)
+**Progreso:** 5/7 Tasks (71%) — ⏸️ SIGUIENTE: Task 6 (endpoint POST manual-sale)
+
+> NOTA Task 5 (2026-11-13): helper `_make_product` reusa fila sembrada (`Product.objects.first()`) en vez de crear filas nuevas, para evitar colisión de secuencia de Postgres — mismo patrón que Task 4. 5/5 tests verdes. La suite completa `products.tests` tiene 10 fails + 4 errors PRE-EXISTENTES (es_publico/top_sellers/serializers/create_multiple) ajenos a esta task, confirmados en develop limpio.
 > NOTA Task 4: services.py y signals.py YA existían (seeder post_migrate); se AÑADIÓ (append), no se sobreescribió. apps.ready ya importaba products.signals.
 
 > NOTA (2026-11-13): `**/migrations/` está en `.gitignore` del repo enid-store y NINGUNA migración se trackea. Las migraciones se regeneran con `makemigrations`; no se commitean (desviación necesaria del texto literal del plan). Helpers de test reusan filas sembradas por el post_migrate del entorno para evitar colisiones de secuencia de Postgres.
