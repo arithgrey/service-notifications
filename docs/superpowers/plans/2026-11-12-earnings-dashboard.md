@@ -854,7 +854,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - Consumes: `GET /enid/revenue/summary/?year=YYYY&month=MM` (Task 1)
 - Produces: estado local `selectedYear` y `selectedMonth` que comparten las secciones
 
-- [ ] **Step 1: Crear BarChart.vue**
+- [x] **Step 1: Crear BarChart.vue** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/components/Earnings/BarChart.vue -->
@@ -922,7 +922,7 @@ const chartOptions = {
 </script>
 ```
 
-- [ ] **Step 2: Crear MonthSummaryCard.vue**
+- [x] **Step 2: Crear MonthSummaryCard.vue** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/components/Earnings/MonthSummaryCard.vue -->
@@ -978,7 +978,7 @@ export default {}
 > </script>
 > ```
 
-- [ ] **Step 3: Implementar Rendimiento.vue con BarChart + MonthSummaryCard**
+- [x] **Step 3: Implementar Rendimiento.vue con BarChart + MonthSummaryCard** ✅ (2026-11-13)
 
 ```vue
 <!-- service-store/src/views/Earnings/Rendimiento.vue -->
@@ -1056,7 +1056,7 @@ onMounted(() => { fetchMonthly(); fetchSummary() })
 </script>
 ```
 
-- [ ] **Step 4: Verificar en browser**
+- [x] **Step 4: Verificar en browser** ✅ (2026-11-13) — BarChart + MonthSummaryCard funcionando con datos reales
 
 ```
 http://localhost/ingresos/rendimiento
@@ -1068,7 +1068,7 @@ Verificar:
 - Card de resumen visible
 - Click en barra → card actualiza mes
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit** ✅ (2026-11-13)
 
 ```bash
 git add service-store/src/components/Earnings/BarChart.vue service-store/src/components/Earnings/MonthSummaryCard.vue service-store/src/views/Earnings/Rendimiento.vue
@@ -1478,4 +1478,4 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 ---
 
-**Progreso:** 3/6 Tasks (50%) — ⏸️ SIGUIENTE: Task 4 Step 1 (crear BarChart.vue en service-store/src/components/Earnings/)
+**Progreso:** 4/6 Tasks (67%) — ⏸️ SIGUIENTE: Task 5 Step 1 (crear LineChart.vue)
