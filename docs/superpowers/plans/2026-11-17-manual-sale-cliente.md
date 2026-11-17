@@ -945,8 +945,248 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 ---
 
-## Progreso: 3/3 Tasks (100%) ✅
+### Task 4: Setup Playwright E2E framework
+
+**Repo:** `service-store/`
+
+**Files:**
+- Modify: `src/components/Banner/ShippingAndReturns.vue` (añadir `data-test="nav-login"`)
+- Modify: `package.json` (añadir `@playwright/test` + script `test:e2e`)
+- Create: `playwright.config.js`
+- Create: `docker-compose.e2e.yml`
+
+**Interfaces:**
+- Produce: contenedor `enid_store_e2e` con Playwright + Chromium accesible vía `docker exec`
+- Base URL E2E: `http://localhost` (nginx port 80 → frontend:5173)
+
+---
+
+- [ ] **Step 1: Añadir `data-test="nav-login"` al botón de login en ShippingAndReturns.vue**
+
+Archivo: `src/components/Banner/ShippingAndReturns.vue`, línea 292.
+
+Cambiar:
+```html
+<a
+  class="group -m-2 flex items-center cursor-pointer p-2"
+  @click="openSeccionLogin"
+>
+```
+Por:
+```html
+<a
+  class="group -m-2 flex items-center cursor-pointer p-2"
+  data-test="nav-login"
+  @click="openSeccionLogin"
+>
+```
+
+- [ ] **Step 2: Actualizar `package.json`**
+
+Añadir en `devDependencies`:
+```json
+"@playwright/test": "^1.49.1"
+```
+
+Añadir en `scripts`:
+```json
+"test:e2e": "playwright test"
+```
+
+- [ ] **Step 3: Crear `playwright.config.js` en la raíz de `service-store/`**
+
+```js
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  use: {
+    baseURL: 'http://localhost',
+    headless: true,
+    viewport: { width: 1280, height: 720 },
+  },
+  timeout: 30000,
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+  ],
+});
+```
+
+- [ ] **Step 4: Crear `docker-compose.e2e.yml` en la raíz de `service-store/`**
+
+```yaml
+version: '3'
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.49.1-jammy
+    container_name: enid_store_e2e
+    network_mode: host
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: tail -f /dev/null
+```
+
+- [ ] **Step 5: Levantar contenedor e instalar dependencias**
+
+```bash
+cd /home/arithgrey/enid/service-store
+docker compose -f docker-compose.e2e.yml up -d
+docker exec enid_store_e2e npm install
+docker exec enid_store_e2e npx playwright install chromium --with-deps
+```
+
+- [ ] **Step 6: Verificar que el setup funciona**
+
+```bash
+docker exec enid_store_e2e npx playwright --version
+```
+
+Esperado: `Version 1.49.x`
+
+- [ ] **Step 7: Commit en `develop` (repo `service-store`)**
+
+```bash
+cd /home/arithgrey/enid/service-store
+git add src/components/Banner/ShippingAndReturns.vue package.json playwright.config.js docker-compose.e2e.yml
+git commit -m "#0: Task 4 - Setup Playwright E2E framework
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+---
+
+### Task 5: E2E tests — ManualSaleForm golden paths
+
+**Repo:** `service-store/`
+
+**Files:**
+- Create: `tests/e2e/manual_sale_cliente.spec.js`
+
+**Interfaces:**
+- Consume: `http://localhost` (app via nginx port 80)
+- Login: `data-test="nav-login"` → modal con `#floating_email` → "Continuar" → `#password` → "Acceder"
+- Producto admin: `/agregar-producto` → `[data-test^="open-manual-sale-"]`
+- Formulario: `ms-search`, `ms-email`, `ms-customer-name`, `ms-address-toggle`, `ms-address-section`, `ms-submit`
+- Success toast: texto "Venta registrada correctamente"
+
+**Precondición:** `enid_store_e2e` corriendo (Task 4 completa), `enid_store_service` y `enid_nginx` activos.
+
+---
+
+- [ ] **Step 1: Crear directorio y archivo de test E2E**
+
+Crear `tests/e2e/manual_sale_cliente.spec.js`:
+
+```js
+import { test, expect } from '@playwright/test';
+
+async function loginAsAdmin(page) {
+  await page.goto('/');
+  await page.locator('[data-test="nav-login"]').click();
+  await page.locator('#floating_email').fill('enidservice@gmail.com');
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.locator('#password').waitFor({ timeout: 8000 });
+  await page.locator('#password').fill('enidservice@gmail.com');
+  await page.getByRole('button', { name: 'Acceder' }).click();
+  await page.locator('[data-test="nav-login"]').waitFor({ state: 'hidden', timeout: 10000 });
+  await page.goto('/agregar-producto');
+}
+
+test.describe('ManualSaleForm E2E', () => {
+  test('venta manual con cliente existente via búsqueda', async ({ page }) => {
+    await loginAsAdmin(page);
+
+    const openBtn = page.locator('[data-test^="open-manual-sale-"]').first();
+    await openBtn.waitFor({ timeout: 15000 });
+    await openBtn.click();
+
+    await page.locator('[data-test="ms-search"]').waitFor({ timeout: 8000 });
+    await page.locator('[data-test="ms-search"]').fill('enidservice@gmail.com');
+
+    // Esperar dropdown con resultado real (no el placeholder "Cliente nuevo")
+    const dropdownItem = page.locator('ul li').filter({ hasText: 'enidservice@gmail.com' }).first();
+    await dropdownItem.waitFor({ timeout: 5000 });
+    await dropdownItem.click();
+
+    // Verificar autofill
+    await expect(page.locator('[data-test="ms-email"]')).toHaveValue('enidservice@gmail.com');
+
+    await page.locator('[data-test="ms-submit"]').click();
+    await expect(page.getByText('Venta registrada correctamente')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('venta manual con cliente nuevo y dirección', async ({ page }) => {
+    const uniqueEmail = `e2e-test-${Date.now()}@test.com`;
+
+    await loginAsAdmin(page);
+
+    const openBtn = page.locator('[data-test^="open-manual-sale-"]').first();
+    await openBtn.waitFor({ timeout: 15000 });
+    await openBtn.click();
+
+    await page.locator('[data-test="ms-search"]').waitFor({ timeout: 8000 });
+
+    // Llenar cliente manualmente (sin usar la búsqueda)
+    await page.locator('[data-test="ms-email"]').fill(uniqueEmail);
+    await page.locator('[data-test="ms-customer-name"]').fill('Cliente E2E Test');
+
+    // Activar toggle de dirección
+    await page.locator('[data-test="ms-address-toggle"]').check();
+    await page.locator('[data-test="ms-address-section"]').waitFor({ timeout: 3000 });
+
+    // Llenar campos de dirección usando el texto de las etiquetas (del template)
+    await page.getByLabel('Calle').fill('Calle Playwright');
+    await page.getByLabel('Número').first().fill('42');
+    await page.getByLabel('Número interior').fill('1');
+    await page.getByLabel('Colonia').fill('Colonia Test');
+    await page.getByLabel('Municipio / Delegación').fill('Municipio Test');
+    await page.getByLabel('Ciudad').fill('CDMX');
+    // Seleccionar primer estado real (índice 1 para saltar el placeholder deshabilitado)
+    await page.getByLabel('Estado').selectOption({ index: 1 });
+    await page.getByLabel('CP').fill('06600');
+    await page.getByLabel('Teléfono').fill('5512345678');
+
+    await page.locator('[data-test="ms-submit"]').click();
+    await expect(page.getByText('Venta registrada correctamente')).toBeVisible({ timeout: 10000 });
+  });
+});
+```
+
+- [ ] **Step 2: Correr los tests E2E**
+
+```bash
+docker exec enid_store_e2e npx playwright test tests/e2e/manual_sale_cliente.spec.js --reporter=list
+```
+
+Esperado: `2 passed` sin errores.
+
+- [ ] **Step 3: Si algún test falla, leer el reporte y corregir**
+
+```bash
+# Ver reporte HTML (opcional)
+docker exec enid_store_e2e npx playwright test tests/e2e/manual_sale_cliente.spec.js --reporter=html
+# El reporte se genera en playwright-report/
+```
+
+Volver a Step 2 hasta obtener `2 passed`.
+
+- [ ] **Step 4: Commit en `develop` (repo `service-store`)**
+
+```bash
+cd /home/arithgrey/enid/service-store
+git add tests/e2e/manual_sale_cliente.spec.js
+git commit -m "#0: Task 5 - E2E tests ManualSaleForm cliente existente y nuevo + dirección
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+---
+
+## Progreso: 5/5 Tasks (100%) ✅
 
 - [x] Task 1: GET /productos/clientes/ search endpoint ✅ (2026-11-17)
 - [x] Task 2: Extender POST /productos/manual-sale/ ✅ (2026-11-17)
 - [x] Task 3: ManualSaleForm.vue — búsqueda, cliente y dirección ✅ (2026-11-17)
+- [x] Task 4: Setup Playwright E2E framework ✅ (2026-11-17)
+- [x] Task 5: E2E tests — ManualSaleForm golden paths ✅ (2026-11-17)
