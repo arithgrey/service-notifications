@@ -30,9 +30,10 @@
   - Archivos: `reverse_proxy_nginx/proxy.conf`
   - Esperado: `curl http://localhost/enid/...` y `/oauth/...` llegan al upstream (no 404 de nginx).
   - **Hecho:** 9 locations en :80 (sin CORS, mismo-origen). `nginx -t` OK. `/enid/categorias/` → 200 (igual que :8000). Resto → 502: upstreams (oauth 8083, lead, stock, landings, faqs, references) no levantados localmente; nginx rutea (no 404). Re-verificar con servicios arriba en Step 9.
-- [ ] **Step 5: `server_name _` y retirar mapa CORS con hosts fijos**
+- [x] **Step 5: `server_name _` y retirar mapa CORS con hosts fijos** ✅ (2026-11-19)
   - Archivos: `reverse_proxy_nginx/proxy.conf`
   - Esperado: `nginx -t` OK; funciona con Host = IP, dominio y localhost.
+  - **Hecho:** `server_name _` en ambos bloques; mapa ahora `default $http_origin` (sin hosts fijos, solo afecta :8000 transitorio). `nginx -t` OK. Host=localhost/127.0.0.1 → 200. Host=IP/dominio → 400 por `DisallowedHost` de Django (verificado directo en :8085; `ALLOWED_HOSTS` local), NO nginx: se resuelve en Step 8 (`ALLOWED_HOSTS=*`). CORS :8000 refleja Origin OK.
 
 ## Task 3: Frontend relativo
 
@@ -56,5 +57,5 @@
   - Esperado: login, listado de productos e imágenes OK por IP (y dominio si DNS apunta). Exit code 0.
 
 ---
-**Progreso:** 4/9 Steps (44%)
-⏸️ SIGUIENTE: Step 5
+**Progreso:** 5/9 Steps (55%)
+⏸️ SIGUIENTE: Step 6
