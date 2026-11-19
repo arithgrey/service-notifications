@@ -52,9 +52,14 @@
 
 ## Task 4: Interruptor APP_ENV
 
-- [ ] **Step 8: `APP_ENV` en compose de enid-store y service-store**
+- [x] **Step 8: `APP_ENV` en compose de enid-store y service-store** ✅ (2026-11-19)
   - Archivos: `enid-store/enid/docker-compose.yml`, `service-store/docker-compose.yml`, `service-store/Dockerfile.prod` (nuevo, build estático)
   - Esperado: `APP_ENV=dev` → Vite HMR; `prod` → build estático, `DEBUG=False`, `ALLOWED_HOSTS=*`, puertos a `127.0.0.1`.
+  - **Hecho:**
+    - enid-store: `settings.py` → `APP_ENV` (default `prod`, falla cerrado), `DEBUG = APP_ENV=='dev'`, `ALLOWED_HOSTS=['*']`. Compose pasa `APP_ENV=${APP_ENV:-dev}`; puertos 8085/5678/5434/8089 a `127.0.0.1`. Tests `enid/tests/test_app_env_integration.py`: RED (3 fallos) → GREEN (6/6 con `image`). Verificado real: dev → Host=IP 200 (antes 400); `APP_ENV=prod` → `DEBUG False`, 404 genérico.
+    - service-store: compose con profiles `dev` (Vite HMR, `Dockerfile`) y `prod` (`frontend-prod`, `Dockerfile.prod` nuevo: `vite build` + `vite preview`); puerto a `127.0.0.1`. `vite.config.js`: `allowedHosts: true`. Prod verificado: imagen construye, sirve `index` con assets hasheados, sin `@vite/client`, fallback SPA 200, Host=dominio 200.
+    - Login E2E (Step 6) sigue en verde tras recrear contenedores.
+  - **Limitaciones:** el interruptor del frontend son DOS variables (`APP_ENV` + `COMPOSE_PROFILES`), no una. El resto de servicios (oauth, leads, stock, etc.) NO se tocó: sus puertos siguen abiertos y su `ALLOWED_HOSTS` sigue por `.env`. En el VPS el `.env` de enid-store debe llevar `APP_ENV=prod`. `vite preview` no es servidor endurecido.
 
 ## Task 5: Verificación real en VPS
 
@@ -63,5 +68,5 @@
   - Esperado: login, listado de productos e imágenes OK por IP (y dominio si DNS apunta). Exit code 0.
 
 ---
-**Progreso:** 7/9 Steps (77%)
-⏸️ SIGUIENTE: Step 8
+**Progreso:** 8/9 Steps (88%)
+⏸️ SIGUIENTE: Step 9
