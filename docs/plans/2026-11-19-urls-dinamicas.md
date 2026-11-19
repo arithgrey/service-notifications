@@ -19,9 +19,10 @@
   - Archivos: `enid-store/enid/image/tests/` (Testcontainers + Postgres real, sin mocks)
   - Esperado: test falla con el código actual.
   - **Hecho:** `image/tests/test_image_url_integration.py` (3 tests, Postgres real del compose; patrón de `order/tests/`, sin testcontainers: no hay en requirements). Se eliminó el stub vacío `image/tests.py`. RED verificado: `docker exec enid_store_service python manage.py test image --noinput` → 3 FAIL (URL absoluta con host fijo; `None` sin DOMAIN).
-- [ ] **Step 3: `get_image_url` devuelve `self.image.url`; test GREEN**
+- [x] **Step 3: `get_image_url` devuelve `self.image.url`; test GREEN** ✅ (2026-11-19)
   - Archivos: `enid-store/enid/image/models.py`
   - Esperado: test pasa dentro del contenedor (`docker exec`).
+  - **Hecho:** 3/3 GREEN. Suite completa: 36 fallos/errores preexistentes (idénticos antes y después, ninguno nuevo); no son de este plan.
 
 ## Task 2: nginx mismo-origen
 
@@ -54,5 +55,5 @@
   - Esperado: login, listado de productos e imágenes OK por IP (y dominio si DNS apunta). Exit code 0.
 
 ---
-**Progreso:** 2/9 Steps (22%)
-⏸️ SIGUIENTE: Step 3
+**Progreso:** 3/9 Steps (33%)
+⏸️ SIGUIENTE: Step 4
