@@ -6,9 +6,15 @@
 
 ## Task 1: Imágenes con URL relativa
 
-- [ ] **Step 1: Investigar origen de `http://localhost/uploads/...` en la API**
+- [x] **Step 1: Investigar origen de `http://localhost/uploads/...` en la API** ✅ (2026-11-19)
   - Archivos: `enid-store/enid/image/`, `products/` (solo lectura)
   - Esperado: causa documentada en este plan.
+  - **Hallazgo (verificado):** `ImageSerializer` (`image/serializers.py`) expone DOS campos:
+    - `image`: `ImageField` de DRF, `use_url` por defecto; con `request` en contexto arma URL absoluta con el `Host` del request. Probado en VPS: `Host: localhost` → `http://localhost/uploads/X`; `Host: enidservice.tech` → `http://enidservice.tech/uploads/X`. Este es el origen de las URLs `localhost`.
+    - `get_image_url`: `settings.DOMAIN + image.url` → `http://enidservice.tech:8000/uploads/X` (fijo, sin `/uploads/` en nginx :8000).
+  - **Consumo en frontend:** casi todos los componentes usan `get_image_url` (ej. `ProductDetail.vue:133`, `RecentProducts.vue:245`). `ProductCard.vue:5` usa `product.image` (campo distinto de producto, no verificado).
+  - **Consecuencia para Step 3:** basta cambiar `get_image_url` a ruta relativa; el frontend no cambia para imágenes. `revenue/views.py:152` ya devuelve `image.url` relativo.
+  - **Pendiente:** verificar origen de `product.image` en `ProductCard.vue:5` (Step 6/7).
 - [ ] **Step 2: Test de integración (RED) — imagen devuelve ruta relativa**
   - Archivos: `enid-store/enid/image/tests/` (Testcontainers + Postgres real, sin mocks)
   - Esperado: test falla con el código actual.
@@ -47,5 +53,5 @@
   - Esperado: login, listado de productos e imágenes OK por IP (y dominio si DNS apunta). Exit code 0.
 
 ---
-**Progreso:** 0/9 Steps (0%)
-⏸️ SIGUIENTE: Step 1
+**Progreso:** 1/9 Steps (11%)
+⏸️ SIGUIENTE: Step 2
