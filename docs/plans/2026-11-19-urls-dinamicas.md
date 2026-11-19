@@ -42,9 +42,13 @@
   - Esperado: peticiones salen al mismo origen; E2E Playwright de login OK.
   - **Hecho:** `baseURL = '/'` (no `''`: las rutas sin slash inicial, ej. `oauth/login/refresh-token/`, colgarían de la ruta actual). Test `tests/e2e/login_same_origin.spec.js` (login real vía nginx :80 → oauth real, sin mocks). RED real: origin `http://localhost:8000` ≠ `http://localhost`. GREEN: 1 passed, exit 0. Verificación de `/oauth/` llegando a upstream real (pendiente de Step 4): OK (`/oauth/user/exists/` 200, `/oauth/login/sigin/` 200).
   - **Hallazgo de entorno (aprobado por usuario):** el admin local tenía password en plano; la UI manda `sha256(password)`. Se reseteó en la DB local de service-oauth (`set_password(sha256('enidservice@gmail.com'))`), solo datos locales, no versionado. Se arrancaron contenedores detenidos: oauth, oauth postgres, frontend, enid_store_e2e. El spec previo `manual_sale_cliente` no se corrió.
-- [ ] **Step 7: Revisar `google.js` y `EcommerceHelper.js`**
+- [x] **Step 7: Revisar `google.js` y `EcommerceHelper.js`** ✅ (2026-11-19)
   - Archivos: `service-store/src/config/google.js`, `service-store/src/helpers/EcommerceHelper.js`
   - Esperado: sin hosts hardcodeados, o justificación documentada.
+  - **Hecho (solo lectura, sin cambios de código):**
+    - `google.js`: sin host fijo. `redirectUri = VITE_GOOGLE_REDIRECT_URI || window.location.origin + '/auth/google/callback'` (dinámico por defecto). `VITE_GOOGLE_REDIRECT_URI` en `env.example` es override opcional; dejarlo sin definir en prod. `clientId` viene de `VITE_GOOGLE_CLIENT_ID`.
+    - `EcommerceHelper.js`: solo lee `VITE_STORE`; sin hosts.
+    - **Hallazgo fuera de alcance (no tocado):** ~8 componentes (`ProductDetail`, `RecentProducts*`, `WishlistButton`…) usan fallback `https://enidservice.com/public/images/04.jpg` cuando no hay imagen: host externo fijo, no depende de APP_ENV. Decidir aparte si se sirve local.
 
 ## Task 4: Interruptor APP_ENV
 
@@ -59,5 +63,5 @@
   - Esperado: login, listado de productos e imágenes OK por IP (y dominio si DNS apunta). Exit code 0.
 
 ---
-**Progreso:** 6/9 Steps (66%)
-⏸️ SIGUIENTE: Step 7
+**Progreso:** 7/9 Steps (77%)
+⏸️ SIGUIENTE: Step 8
