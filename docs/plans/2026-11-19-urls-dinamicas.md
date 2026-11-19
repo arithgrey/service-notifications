@@ -37,9 +37,11 @@
 
 ## Task 3: Frontend relativo
 
-- [ ] **Step 6: `baseURL` relativo, quitar `VITE_APP_API`**
+- [x] **Step 6: `baseURL` relativo, quitar `VITE_APP_API`** ✅ (2026-11-19)
   - Archivos: `service-store/src/axiosInstance.js`, `service-store/env.example`
   - Esperado: peticiones salen al mismo origen; E2E Playwright de login OK.
+  - **Hecho:** `baseURL = '/'` (no `''`: las rutas sin slash inicial, ej. `oauth/login/refresh-token/`, colgarían de la ruta actual). Test `tests/e2e/login_same_origin.spec.js` (login real vía nginx :80 → oauth real, sin mocks). RED real: origin `http://localhost:8000` ≠ `http://localhost`. GREEN: 1 passed, exit 0. Verificación de `/oauth/` llegando a upstream real (pendiente de Step 4): OK (`/oauth/user/exists/` 200, `/oauth/login/sigin/` 200).
+  - **Hallazgo de entorno (aprobado por usuario):** el admin local tenía password en plano; la UI manda `sha256(password)`. Se reseteó en la DB local de service-oauth (`set_password(sha256('enidservice@gmail.com'))`), solo datos locales, no versionado. Se arrancaron contenedores detenidos: oauth, oauth postgres, frontend, enid_store_e2e. El spec previo `manual_sale_cliente` no se corrió.
 - [ ] **Step 7: Revisar `google.js` y `EcommerceHelper.js`**
   - Archivos: `service-store/src/config/google.js`, `service-store/src/helpers/EcommerceHelper.js`
   - Esperado: sin hosts hardcodeados, o justificación documentada.
@@ -57,5 +59,5 @@
   - Esperado: login, listado de productos e imágenes OK por IP (y dominio si DNS apunta). Exit code 0.
 
 ---
-**Progreso:** 5/9 Steps (55%)
-⏸️ SIGUIENTE: Step 6
+**Progreso:** 6/9 Steps (66%)
+⏸️ SIGUIENTE: Step 7
