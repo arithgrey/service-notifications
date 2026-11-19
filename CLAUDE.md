@@ -267,6 +267,26 @@ cualquier repo, DETENTE.
 queda sin commitear o en ramas sueltas, el avance se pierde al cambiar de contexto o hacer
 `/clear`. `develop` es la ÚNICA rama de integración viva, igual en todos los repos.
 
+### Flujo Local → Push → Prod (VPS) ⭐
+
+<HARD-GATE>
+El código SOLO se modifica en LOCAL, en la rama `develop` de cada repo (misma regla de arriba).
+NUNCA se edita código directamente en el VPS (`/home/enid`). El VPS solo hace `git pull`.
+Si estás a punto de editar un archivo de código por SSH en el VPS, DETENTE.
+</HARD-GATE>
+
+1. **Local:** desarrollar y probar en `develop` (docker compose local), commit por Step.
+2. **Push:** `git push origin develop` en el/los repos tocados, cuando se logra algo
+   verificado (tests/E2E en verde). No se pushea trabajo roto ni a medias.
+3. **Prod (VPS `/home/enid`):** `git pull` en cada repo tocado y levantar con
+   `docker compose` (rebuild si cambió Dockerfile o dependencias).
+
+**Excepción:** en el VPS solo se editan archivos de entorno no versionados (`.env`).
+Cualquier otro cambio nace en local y llega por pull.
+
+**Por qué:** si se edita en el VPS, el código de prod diverge del repo y el siguiente
+`git pull` choca o pisa el cambio. Local → push → pull mantiene una sola fuente de verdad.
+
 ### Process Flow — Git Workflow
 
 ```dot
@@ -555,3 +575,258 @@ Para verificar en browser como admin, hacer login en `http://localhost/login` co
 <HARD-GATE>
 El software solo se considera aprobado cuando cuenta con pruebas de integración 
 </HARD-GATE>
+
+
+<HARD-GATE>
+objetos, no inferencia cero alusinaciones 
+</HARD-GATE>
+
+<HARD-GATE>
+REGLA INVIOLABLE DE OPERACIÓN Y CREACIÓN DE AGENTES:
+1. SOLO OBJETOS VERIFICADOS: Opera y diseña agentes exclusivamente a partir de objetos, esquemas, archivos o herramientas entregados explícitamente en el contexto o leídos mediante herramientas en el turno actual.
+2. CERO INFERENCIA: Prohibido deducir reglas de negocio, asumir valores por defecto, completar esquemas parciales, suponer capacidades no declaradas o adivinar nombres de campos por convención.
+3. CERO ALUCINACIONES: Si falta un objeto, propiedad, permiso, endpoint o herramienta para completar la Spec o el Plan, DETÉN EL FLUJO inmediatamente, emite `HARD-GATE STOP` listando el objeto exacto faltante y finaliza tu respuesta.
+4. BLOQUEO DE FASE Y PAUSA DE APROBACIÓN: Nunca pases a EJECUCIÓN sin haber generado y validado primero la SPEC y el PLAN. Al crear nuevos agentes o modificar arquitecturas, detente tras el PLAN y solicita aprobación explícita antes de ejecutar (salvo que el usuario indique `--auto-exec`).
+5. HERENCIA OBLIGATORIA: Todo nuevo agente generado bajo este estándar DEBE incluir este bloque `<HARD-GATE>`, el `<ANTI-RATIONALIZATION>` y el grafo `Process Flow` intactos en su definición raíz.
+</HARD-GATE>
+
+<ANTI-RATIONALIZATION>
+Si detectas cualquiera de estos pensamientos o patrones en tu razonamiento, DETENTE INMEDIATAMENTE (es una alucinación en proceso):
+- "Es un caso trivial o muy obvio, me salto la SPEC." -> VIOLACIÓN DE GATE.
+- "El usuario probablemente quiso decir X, lo completo por conveniencia." -> VIOLACIÓN DE GATE.
+- "Asumo una estructura estándar (ej. 'id', 'status', 'created_at') para que el código compile." -> VIOLACIÓN DE GATE.
+- "Para ahorrar turnos, genero Spec, Plan y Ejecución de una vez." -> VIOLACIÓN DE GATE (si hay ambigüedad o creación de agente).
+- "No tengo el objeto a la mano, pero recuerdo cómo suele funcionar esta API/librería." -> VIOLACIÓN DE GATE.
+</ANTI-RATIONALIZATION>
+
+### Process Flow — Spec → Plan → Ejecución
+
+```dot
+digraph agent_meta_standard {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // Entrada
+    Objects [label="Objetos Base\n(Contexto / Schemas / Tools)", fillcolor="#E3F2FD", color="#1565C0"];
+
+    // Fases
+    Spec [label="1. SPEC\nInventario literal de objetos,\ntipos y restricciones", fillcolor="#F3E5F5", color="#6A1B9A"];
+    Plan [label="2. PLAN\nGrafo de pasos deterministas\n(1 paso = 1 objeto validado)", fillcolor="#FFF3E0", color="#EF6C00"];
+    Approval [label="PAUSA HITL\nEsperar aprobación\n(salvo --auto-exec)", shape=hexagon, fillcolor="#E0F7FA", color="#00838F"];
+    Exec [label="3. EJECUCIÓN\nOutput exacto o Definición\ndel Nuevo Agente con Hard-Gate", fillcolor="#E8F5E9", color="#2E7D32"];
+
+    // Compuertas de Control
+    Gate_Spec [label="¿100% Objetos\nVerificados?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_Plan [label="¿Cero Inferencia\ny Trazabilidad 1:1?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_Inherited [label="¿Agente hijo hereda\n<HARD-GATE> + DOT?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+
+    // Estado de Bloqueo
+    Halt [label="HARD-GATE STOP\nBloqueo inmediato:\nListar objetos faltantes", shape=octagon, fillcolor="#FFEBEE", color="#C62828"];
+
+    // Transiciones
+    Objects -> Spec [label="Lectura literal"];
+    Spec -> Gate_Spec;
+    Gate_Spec -> Plan [label="SÍ"];
+    Gate_Spec -> Halt [label="NO (Falta objeto)"];
+
+    Plan -> Gate_Plan;
+    Gate_Plan -> Approval [label="SÍ (Modo Creación)"];
+    Gate_Plan -> Exec [label="SÍ (--auto-exec)"];
+    Gate_Plan -> Halt [label="NO (Inferencia detectada)"];
+
+    Approval -> Exec [label="Aprobado"];
+    Approval -> Halt [label="Rechazado / Cambios"];
+
+    Exec -> Gate_Inherited [label="Si genera agente"];
+    Gate_Inherited -> Halt [label="NO (Violación estándar)"];
+}
+```
+
+
+<HARD-GATE>
+REGLA INVIOLABLE DE DESARROLLO Y VERIFICACIÓN E2E:
+1. SOLO OBJETOS Y ENTORNOS VERIFICADOS: Desarrolla y prueba exclusivamente contra contratos, esquemas, endpoints, selectores DOM y comandos E2E entregados en el contexto o leídos mediante herramientas.
+2. CERO INFERENCIA DE SELECTORES O RUTAS: Prohibido adivinar rutas de API, variables de entorno, puertos, credenciales o selectores UI (`data-testid`, clases, IDs). Si no están en los objetos base, detén el flujo.
+3. CERO ALUCINACIONES DE RESULTADOS ("MOCKED PASS"): Prohibido afirmar que un flujo funciona basándose en lectura estática del código o simulando salidas en texto. Un desarrollo sin ejecución E2E real y log de salida verificado es un FALLO.
+4. BLOQUEO DE ENTREGA (NO E2E = NO DONE): Ningún código o agente puede marcarse como completado sin haber ejecutado el suite E2E definido en la SPEC y obtenido exit code `0` (o validación explícita de todos los criterios de aceptación).
+5. HERENCIA OBLIGATORIA: Todo agente o pipeline creado bajo este estándar DEBE incluir este `<HARD-GATE>`, el `<ANTI-RATIONALIZATION>` y el grafo `Process Flow` intactos.
+</HARD-GATE>
+
+<ANTI-RATIONALIZATION>
+Si detectas cualquiera de estos pensamientos o excusas, DETENTE INMEDIATAMENTE (es una violación de calidad E2E):
+- "El código es muy sencillo y claramente compila, no hace falta correr E2E." -> VIOLACIÓN DE GATE.
+- "No tengo acceso al servidor levantado, así que asumo que el endpoint responde 200 OK." -> VIOLACIÓN DE GATE (Emite HARD-GATE STOP).
+- "Las pruebas unitarias pasaron, con eso es suficiente." -> VIOLACIÓN DE GATE (Unitario != E2E).
+- "Invento un `data-testid='submit-btn'` porque aún no leo el componente frontend." -> VIOLACIÓN DE GATE.
+- "Fallo el E2E por un timeout, seguro es tema del entorno y doy la tarea por terminada." -> VIOLACIÓN DE GATE (Debe volver a Ejecución y re-verificar).
+</ANTI-RATIONALIZATION>
+
+### Process Flow — Spec → Plan → Ejecución → E2E
+
+```dot
+digraph dev_e2e_standard {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // Entrada
+    Objects [label="Objetos Base\n(Contratos / Repo / Entorno E2E)", fillcolor="#E3F2FD", color="#1565C0"];
+
+    // Fases
+    Spec [label="1. SPEC\nObjetos, rutas reales y\ncriterios E2E verificables", fillcolor="#F3E5F5", color="#6A1B9A"];
+    Plan [label="2. PLAN\nPasos de implementación +\nCasos de prueba E2E exactos", fillcolor="#FFF3E0", color="#EF6C00"];
+    Exec [label="3. EJECUCIÓN\nImplementación de código\ny scripts E2E (sin mocks)", fillcolor="#E8F5E9", color="#2E7D32"];
+    E2E [label="4. VERIFICACIÓN E2E\nEjecución real de extremo\na extremo + captura de logs", fillcolor="#E0F2F1", color="#00695C"];
+    Done [label="DONE / ENTREGA\nCódigo + Evidencia E2E\n(Exit Code 0)", shape=doubleoctagon, fillcolor="#DCEDC8", color="#33691E"];
+
+    // Compuertas de Control
+    Gate_Spec [label="¿Contratos y\ncomando E2E\nverificados?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_Plan [label="¿100% trazable\ny cero suposiciones?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_E2E [label="¿E2E ejecutado\nrealmente y\n100% PASS?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+
+    // Estado de Bloqueo
+    Halt [label="HARD-GATE STOP\nBloqueo inmediato:\nFaltan objetos o entorno E2E", shape=octagon, fillcolor="#FFEBEE", color="#C62828"];
+
+    // Transiciones
+    Objects -> Spec [label="Inspección literal"];
+    Spec -> Gate_Spec;
+    Gate_Spec -> Plan [label="SÍ"];
+    Gate_Spec -> Halt [label="NO (Falta objeto/runner)"];
+
+    Plan -> Gate_Plan;
+    Gate_Plan -> Exec [label="SÍ"];
+    Gate_Plan -> Halt [label="NO (Inferencia)"];
+
+    Exec -> E2E [label="Despliegue / Run"];
+    E2E -> Gate_E2E;
+    Gate_E2E -> Done [label="SÍ (Evidencia real)"];
+    Gate_E2E -> Exec [label="NO (Fix & Re-test)"];
+}
+```
+
+<HARD-GATE>
+REGLA INVIOLABLE CERO MOCKS (SOLO INFRAESTRUCTURA REAL):
+1. PROHIBICIÓN ABSOLUTA DE SIMULACIONES: Queda estrictamente prohibido crear, importar o utilizar `mocks`, `stubs`, `spies`, `fakes`, servidores simulados (`msw`, `nock`, `wiremock`), bases de datos en memoria (`sqlite :memory:`, `mongodb-memory-server`) o funciones dummy con datos hardcodeados.
+2. OBJETOS E INFRAESTRUCTURA REAL: Todo código y prueba debe conectarse a instancias reales y verificadas (servicios activos, contenedores Docker de prueba, bases de datos reales o entornos staging) declarados explícitamente en los objetos de entrada.
+3. BLOQUEO POR FALTA DE ENTORNO: Si una dependencia externa, credencial, contenedor o base de datos real no está disponible o levantada, DETÉN EL FLUJO inmediatamente y emite `HARD-GATE STOP: Infraestructura real no disponible [Nombre_Servicio]`. Nunca sustituyas una dependencia caída con un mock.
+4. VERIFICACIÓN DE ESTADO PERSISTIDO: Ninguna prueba se considera válida si solo verifica que "se llamó a una función". Toda verificación debe comprobar el efecto real en el sistema (ej. registro escrito en la DB real, archivo creado en disco, respuesta HTTP real del servicio destino).
+5. HERENCIA OBLIGATORIA: Todo agente o flujo generado bajo este estándar DEBE heredar este `<HARD-GATE>`, el `<ANTI-RATIONALIZATION>` y el grafo `Process Flow` intactos.
+</HARD-GATE>
+
+<ANTI-RATIONALIZATION>
+Si detectas cualquiera de estas excusas o patrones en tu razonamiento, DETENTE INMEDIATAMENTE (es una violación de integridad real):
+- "Uso `jest.mock()` / `unittest.mock` / `sinon` para aislar la lógica y que corra más rápido." -> VIOLACIÓN DE GATE (El aislamiento con mocks oculta fallos reales).
+- "La base de datos o API externa no está levantada, así que creo un mock temporal para avanzar." -> VIOLACIÓN DE GATE (Emite HARD-GATE STOP).
+- "Uso SQLite en memoria en lugar de PostgreSQL/MySQL real para simplificar." -> VIOLACIÓN DE GATE (Motores distintos tienen comportamientos distintos).
+- "Retorno un JSON estático simulando la respuesta del servicio." -> VIOLACIÓN DE GATE.
+- "Verifico con `expect(repo.save).toHaveBeenCalled()` en vez de consultar la base de datos." -> VIOLACIÓN DE GATE (Eso prueba el mock, no el sistema).
+</ANTI-RATIONALIZATION>
+
+### Process Flow — Spec → Plan → Ejecución → Verificación Real (Zero-Mocks)
+
+```dot
+digraph zero_mocks_standard {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // Entrada
+    Infra [label="Objetos & Infra Real\n(DB viva / Servicios / Env)", fillcolor="#E3F2FD", color="#1565C0"];
+
+    // Fases
+    Spec [label="1. SPEC\nInventario de objetos +\nEndpoints/DBs reales activos", fillcolor="#F3E5F5", color="#6A1B9A"];
+    Plan [label="2. PLAN\nFlujo de datos real\n(Cero capas simuladas)", fillcolor="#FFF3E0", color="#EF6C00"];
+    Exec [label="3. EJECUCIÓN\nCódigo y tests conectados\na infraestructura real", fillcolor="#E8F5E9", color="#2E7D32"];
+    Verify [label="4. AUDITORÍA & RUN\nEscaneo anti-mocks +\nEjecución contra sistema vivo", fillcolor="#E0F2F1", color="#00695C"];
+    Done [label="DONE / VERIFICADO\n0 Mocks + Evidencia\nde estado real", shape=doubleoctagon, fillcolor="#DCEDC8", color="#33691E"];
+
+    // Compuertas de Control
+    Gate_Infra [label="¿Infraestructura real\nconectada y viva?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_Plan [label="¿100% dependencias\nreales en el plan?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_NoMocks [label="¿0 imports/uso de mocks\n+ Efecto real verificado?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+
+    // Estado de Bloqueo
+    Halt [label="HARD-GATE STOP\nBloqueo inmediato:\nFalta servicio real o\nse detectó un MOCK", shape=octagon, fillcolor="#FFEBEE", color="#C62828"];
+
+    // Transiciones
+    Infra -> Spec [label="Lectura literal"];
+    Spec -> Gate_Infra;
+    Gate_Infra -> Plan [label="SÍ (Conexión verificada)"];
+    Gate_Infra -> Halt [label="NO (Servicio caído/faltante)"];
+
+    Plan -> Gate_Plan;
+    Gate_Plan -> Exec [label="SÍ (Cero mocks)"];
+    Gate_Plan -> Halt [label="NO (Propone mock/stub)"];
+
+    Exec -> Verify [label="Ejecución real"];
+    Verify -> Gate_NoMocks;
+    Gate_NoMocks -> Done [label="SÍ (Limpio y real)"];
+    Gate_NoMocks -> Halt [label="NO (Mock detectado)"];
+}
+```
+
+<HARD-GATE>
+REGLA INVIOLABLE DE DATOS SEED (DATOS INICIALES REALES Y DETERMINISTAS):
+1. SOLO SEEDS EXPLÍCITOS Y VERIFICADOS: Toda prueba debe ejecutarse contra datos `seed` reales definidos en archivos/scripts explícitos (`.sql`, `.json`, seeders de ORM, fixtures reales) entregados en el contexto o leídos mediante herramientas.
+2. CERO INFERENCIA DE REGISTROS: Prohibido inventar IDs, correos, tokens, estados o relaciones asumiendo "que ya existen en la base de datos". Si el dato no está definido en el script de seed y cargado en el entorno real, no existe.
+3. CERO ALUCINACIONES DE ESTADO INICIAL: Prohibido ejecutar pruebas sobre una base de datos vacía esperando que pasen por arte de magia, o escribir datos "al vuelo" dentro del test sin declararlos en la SPEC.
+4. PRECONDICIÓN DE CARGA Y LIMPIEZA (SEED → RUN → CLEANUP): Ninguna prueba puede ejecutarse sin confirmar primero que el script `seed` se aplicó exitosamente sobre la infraestructura real (`exit code 0`), y debe garantizar estado determinista (idempotencia/reset controlado) antes de cada corrida.
+5. HERENCIA OBLIGATORIA: Todo agente o pipeline creado bajo este estándar DEBE incluir este `<HARD-GATE>`, el `<ANTI-RATIONALIZATION>` y el grafo `Process Flow` intactos.
+</HARD-GATE>
+
+<ANTI-RATIONALIZATION>
+Si detectas cualquiera de estas excusas o patrones en tu razonamiento, DETENTE INMEDIATAMENTE (es una violación de integridad de datos):
+- "Uso `user_id = 1` asumiendo que es el administrador por defecto." -> VIOLACIÓN DE GATE (El ID debe provenir del objeto Seed verificado).
+- "No hay script de seed, así que inserto datos improvisados con `faker` o valores aleatorios dentro del test." -> VIOLACIÓN DE GATE (Los datos aleatorios rompen el determinismo).
+- "La base de datos ya tiene datos de pruebas anteriores, corro los tests encima de eso." -> VIOLACIÓN DE GATE (Estado contaminado = falsos positivos/negativos).
+- "Simulo el objeto que devolvería el seed en memoria para no tocar la DB." -> VIOLACIÓN DE GATE (Violación Zero-Mocks + Zero-Seed).
+- "Falta el archivo seed de este módulo, pero deduzco los campos obligatorios por el esquema." -> VIOLACIÓN DE GATE (Emite HARD-GATE STOP).
+</ANTI-RATIONALIZATION>
+
+### Process Flow — Spec → Plan → Seed → Ejecución & Verificación
+
+```dot
+digraph deterministic_seed_standard {
+    rankdir=LR;
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // Entrada
+    Objects [label="Objetos Base\n(Esquemas + Scripts Seed + DB Real)", fillcolor="#E3F2FD", color="#1565C0"];
+
+    // Fases
+    Spec [label="1. SPEC\nInventario de entidades Seed,\nIDs reales y comando de carga", fillcolor="#F3E5F5", color="#6A1B9A"];
+    Plan [label="2. PLAN\nSecuencia: Reset -> Seed ->\nTest E2E -> Verificación", fillcolor="#FFF3E0", color="#EF6C00"];
+    SeedExec [label="3. CARGA DE SEED\nEjecución de seeders reales\nen DB/Entorno activo", fillcolor="#E1F5FE", color="#0277BD"];
+    TestExec [label="4. EJECUCIÓN DE PRUEBAS\nTests deterministas leyendo\nlos registros del Seed", fillcolor="#E8F5E9", color="#2E7D32"];
+    Done [label="DONE / VERIFICADO\nSeed aplicado + Tests PASS\nsobre datos reales", shape=doubleoctagon, fillcolor="#DCEDC8", color="#33691E"];
+
+    // Compuertas de Control
+    Gate_Spec [label="¿Archivos Seed y\ncomando verificados?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_Plan [label="¿100% referencias\ntrazables al Seed?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_Seeded [label="¿Seed cargado sin\nerrores en DB real?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+    Gate_Pass [label="¿Assertions contra\ndatos Seed = PASS?", shape=diamond, fillcolor="#FFF9C4", color="#FBC02D"];
+
+    // Estado de Bloqueo
+    Halt [label="HARD-GATE STOP\nBloqueo inmediato:\nFalta script Seed o falló carga", shape=octagon, fillcolor="#FFEBEE", color="#C62828"];
+
+    // Transiciones
+    Objects -> Spec [label="Lectura literal"];
+    Spec -> Gate_Spec;
+    Gate_Spec -> Plan [label="SÍ"];
+    Gate_Spec -> Halt [label="NO (Falta Seed/DB)"];
+
+    Plan -> Gate_Plan;
+    Gate_Plan -> SeedExec [label="SÍ (Determinista)"];
+    Gate_Plan -> Halt [label="NO (Dato inventado)"];
+
+    SeedExec -> Gate_Seeded;
+    Gate_Seeded -> TestExec [label="SÍ (DB poblada)"];
+    Gate_Seeded -> Halt [label="NO (Error en Seed)"];
+
+    TestExec -> Gate_Pass;
+    Gate_Pass -> Done [label="SÍ (Evidencia real)"];
+    Gate_Pass -> Halt [label="NO (Fallo en test)"];
+}
+```
