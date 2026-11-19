@@ -15,9 +15,10 @@
   - **Consumo en frontend:** casi todos los componentes usan `get_image_url` (ej. `ProductDetail.vue:133`, `RecentProducts.vue:245`). `ProductCard.vue:5` usa `product.image` (campo distinto de producto, no verificado).
   - **Consecuencia para Step 3:** basta cambiar `get_image_url` a ruta relativa; el frontend no cambia para imágenes. `revenue/views.py:152` ya devuelve `image.url` relativo.
   - **Pendiente:** verificar origen de `product.image` en `ProductCard.vue:5` (Step 6/7).
-- [ ] **Step 2: Test de integración (RED) — imagen devuelve ruta relativa**
+- [x] **Step 2: Test de integración (RED) — imagen devuelve ruta relativa** ✅ (2026-11-19 10:35)
   - Archivos: `enid-store/enid/image/tests/` (Testcontainers + Postgres real, sin mocks)
   - Esperado: test falla con el código actual.
+  - **Hecho:** `image/tests/test_image_url_integration.py` (3 tests, Postgres real del compose; patrón de `order/tests/`, sin testcontainers: no hay en requirements). Se eliminó el stub vacío `image/tests.py`. RED verificado: `docker exec enid_store_service python manage.py test image --noinput` → 3 FAIL (URL absoluta con host fijo; `None` sin DOMAIN).
 - [ ] **Step 3: `get_image_url` devuelve `self.image.url`; test GREEN**
   - Archivos: `enid-store/enid/image/models.py`
   - Esperado: test pasa dentro del contenedor (`docker exec`).
@@ -53,5 +54,5 @@
   - Esperado: login, listado de productos e imágenes OK por IP (y dominio si DNS apunta). Exit code 0.
 
 ---
-**Progreso:** 1/9 Steps (11%)
-⏸️ SIGUIENTE: Step 2
+**Progreso:** 2/9 Steps (22%)
+⏸️ SIGUIENTE: Step 3
